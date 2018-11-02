@@ -45,11 +45,11 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `fpvtips.com`,
-        short_name: `FPVtips`,
+        name: `streamer-screen.netlify.com`,
+        short_name: `StreamerScreen`,
         start_url: `/`,
         background_color: `#ffffff`,
-        theme_color: `#1960a0`,
+        theme_color: `#0375d8`,
         display: `minimal-ui`,
         icon: `src/assets/fpvtips-logo-512.png`,
       },

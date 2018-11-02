@@ -4,6 +4,7 @@ import { StaticQuery, graphql } from 'gatsby'
 
 import './layout.css'
 
+import AppBar from './AppBar'
 import Footer from './Footer'
 import Wrapper from './Wrapper'
 
@@ -21,6 +22,7 @@ const Layout = ({ children }) => (
     `}
     render={data => (
       <React.Fragment>
+        <AppBar />
         <Wrapper>{children}</Wrapper>
         <Footer />
       </React.Fragment>
