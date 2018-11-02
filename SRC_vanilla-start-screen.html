@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Stream Start Screen</title>
+
+  <style>
+    html,
+    body,
+    #app {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      font-size: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 4rem;
+    }
+
+    h5 {
+      margin: 0;
+      font-size: 1rem;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+    }
+
+    .ball {
+      /* border-radius: 50%; */
+      position: absolute;
+      font-family: Fira Code;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // Get app node
+      const appNode = document.querySelector('#app')
+
+      // Create logo node
+      const logoNode = document.createElement('img')
+      logoNode.src = 'webdev-with-georgi.png'
+      logoNode.alt = 'WebDev with Georgi'
+
+      // Create audio node; Requires document interaction from user
+      appNode.addEventListener('click', () => {
+        const audio = new Audio('Streaming-Intro-Remember.mp3')
+        audio.play()
+      })
+
+      // Ball text
+      const ballText = [
+        'let',
+        'const',
+        '=>',
+        '>=',
+        '===',
+        '==',
+        '<=',
+        'var',
+        '{',
+        '}',
+        '[',
+        ']',
+        '(',
+        ')',
+        '.',
+        '...',
+        'let { name, age } = user',
+        'for',
+        'in',
+        'of',
+        'document',
+        'addEventListener',
+        'click',
+        'play()',
+        'classList',
+        'setInterval',
+        'innerText',
+        'React',
+        'Vue',
+        'Math.ceil()',
+        'Math.random()',
+        'parseInt()',
+        'remove()',
+        'window',
+        'self'
+      ]
+
+      // Create score label node
+      const scoreLabel = document.createElement('h5')
+
+      // Create a timer DOM node
+      const timerNode = document.createElement('h3')
+      timerNode.dataset.timer = 300
+      timerNode.innerText = '5:00'
+
+      // Initiate countdown timer
+      const countDown = self.setInterval(() => {
+
+        // Update timer value
+        timerNode.dataset.timer--
+
+        // Calculate minutes and seconds
+        let minutes = Math.floor(timerNode.dataset.timer / 60)
+        let seconds = timerNode.dataset.timer % 60
+
+        // Update UI
+        timerNode.innerText = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`
+      }, 1000)
+
+      // Animate balls
+      const update = self.setInterval(() => {
+        // Generate balls
+        generateBalls(Math.ceil(Math.random() * 3))
+
+        // Apply decay
+        console.log('Current amount of balls: ' + document.querySelectorAll('[data-time-to-live]').length)
+        document.querySelectorAll('[data-time-to-live]').forEach(ball => {
+          // If ball time to live reaches 0, remove it from the DOM
+          if (parseInt(ball.dataset.timeToLive) <= 0) {
+            ball.remove()
+          }
+
+          // Otherwise apply decay
+          ball.dataset.timeToLive = ball.dataset.timeToLive - 200
+          ball.style.opacity = ball.dataset.timeToLive / 10
+
+          ball.style.transform += `translateY(10px)`
+        })
+      }, 100)
+
+      // Remove countdown timer after 5 minutes
+      self.setTimeout(() => {
+        self.clearInterval(countDown)
+      }, 300000)
+
+      // Create a ball
+      function createBall() {
+        // Create a ball component
+        const ball = document.createElement('div')
+        ball.className = 'ball'
+        // Ball properties:
+        // radius (width & height)
+        // let radius = Math.floor(Math.random() * (42 - 8) + 8)
+
+        // left (0 - window.innerWidth)
+        let leftPosition = Math.floor(Math.random() * window.innerWidth)
+
+        // top (0 - window.innerHeight)
+        let topPosition = Math.floor(Math.random() * window.innerHeight)
+
+        // color
+        let color = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.random()})`
+
+        // data-time-to-live
+        ball.dataset.timeToLive = Math.floor(Math.random() * 10000)
+
+        // ball.style.width = `${radius}px`
+        // ball.style.height = `${radius}px`
+        ball.style.left = `${leftPosition}px`
+        ball.style.top = `${topPosition}px`
+
+        ball.style.color = color
+        // ball.style.backgroundColor = color
+        ball.style.transition = `275ms`
+
+        // ball.style.border = '1px solid red'
+        // ball.style.boxShadow = '0 0 2px 2px #cecece'
+
+        // Make balls pop on user mouse over
+        ball.addEventListener('mouseenter', e => {
+          e.srcElement.remove()
+          // Increment user score
+          inscrementUserScore()
+        })
+
+        ball.innerText = ballText[Math.floor(Math.random() * ballText.length)];
+        return ball
+      }
+
+      // Generate balls function
+      function generateBalls(amount) {
+        // Don't generate more than 25 balls
+        if (document.getElementsByClassName('ball').length > 25) {
+          return
+        }
+
+        // Append the amount of balls to the DOM
+        for (let i = 0; i < amount; i++) {
+          appNode.appendChild(createBall())
+        }
+      }
+
+      // User score
+      function inscrementUserScore() {
+        // Update player score in local storage
+        let score = localStorage.getItem('player_score') || 0
+        score++
+        localStorage.setItem('player_score', score)
+
+        // Update the UI
+        scoreLabel.innerText = `Score: ${score}`
+      }
+
+      // Mount nodes onto the app node
+      appNode.appendChild(logoNode)
+      appNode.appendChild(scoreLabel)
+      appNode.appendChild(timerNode)
+    })
+  </script>
+</body>
+
+</html>

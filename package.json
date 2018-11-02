@@ -1,0 +1,44 @@
+{
+  "name": "streamer-screen",
+  "description": "streamer screens for OBS",
+  "version": "1.0.0",
+  "author": "Georgi Yanev <georgiyanev.gy@gmail.com>",
+  "dependencies": {
+    "@material-ui/core": "^3.1.0",
+    "@material-ui/icons": "^3.0.1",
+    "@wapps/gatsby-plugin-material-ui": "^1.0.7",
+    "babel-plugin-styled-components": "^1.5.1",
+    "gatsby": "^2.0.0",
+    "gatsby-plugin-google-analytics": "^2.0.5",
+    "gatsby-plugin-manifest": "^2.0.0",
+    "gatsby-plugin-react-helmet": "^2.0.0",
+    "gatsby-plugin-sharp": "^2.0.0",
+    "gatsby-plugin-sitemap": "^2.0.0",
+    "gatsby-plugin-styled-components": "^2.0.0",
+    "gatsby-source-filesystem": "^2.0.0",
+    "gatsby-transformer-json": "^2.1.1",
+    "gatsby-transformer-sharp": "^2.0.0",
+    "react": "^16.4.4",
+    "react-dom": "^16.4.4",
+    "react-helmet": "^5.2.0",
+    "styled-components": "^3.3.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.6",
+    "eslint": "^4.19.1",
+    "eslint-plugin-react": "^7.7.0",
+    "prettier": "^1.12.0"
+  },
+  "license": "MIT",
+  "main": "n/a",
+  "scripts": {
+    "clean": "rm -rf .cache && rm -rf public/",
+    "dev": "gatsby develop",
+    "lint": "./node_modules/.bin/eslint --ext .js,.jsx --ignore-pattern public .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --trailing-comma es5 --no-semi --single-quote --write 'src/**/*.js' 'src/**/*.md'",
+    "develop": "gatsby develop",
+    "build": "gatsby build",
+    "fix-semi": "eslint --quiet --ignore-pattern node_modules --ignore-pattern public --parser babel-eslint --no-eslintrc --rule '{\"semi\": [2, \"never\"], \"no-extra-semi\": [2]}' --fix gatsby-node.js"
+  }
+}
