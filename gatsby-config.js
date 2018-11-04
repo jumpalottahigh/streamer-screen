@@ -54,6 +54,5 @@ module.exports = {
         icon: `src/assets/fpvtips-logo-512.png`,
       },
     },
-    `gatsby-plugin-react-helmet`,
   ],
 }
