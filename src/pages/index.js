@@ -59,6 +59,10 @@ const Result = styled(PaperCard)`
   position: relative;
   margin-top: 2rem;
   height: 40vh;
+  background-color: ${props =>
+    props.backgroundColor ? `${props.backgroundColor}!important` : ``};
+  background-image: ${props =>
+    props.backgroundImage ? `url(${props.backgroundImage})` : ``};
 `
 
 const Canvas = styled.div`
@@ -79,6 +83,7 @@ class IndexPage extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      backgroundColor: '#fff',
       backgroundImage:
         'http://gdj.graphicdesignjunction.com/wp-content/uploads/2014/05/003+background+pattern+designs.jpg',
       savedBackgroundImage: '',
@@ -115,6 +120,13 @@ class IndexPage extends React.Component {
         ...this.state[node],
         [field]: event.target.value,
       },
+    })
+  }
+
+  handleBackgroundColorUpdate = color => {
+    this.setState({
+      ...this.state,
+      backgroundColor: color.hex,
     })
   }
 
@@ -212,12 +224,12 @@ class IndexPage extends React.Component {
   }
 
   render() {
-    const { backgroundImage, savedBackgroundImage, title } = this.state
-
-    // Construct styles for the Layout container
-    let style = {
-      backgroundImage: `url(${savedBackgroundImage})`,
-    }
+    const {
+      backgroundImage,
+      backgroundColor,
+      savedBackgroundImage,
+      title,
+    } = this.state
 
     return (
       <Layout location={this.props.location}>
@@ -262,11 +274,18 @@ class IndexPage extends React.Component {
               </UploadedLink>
             )}
           </PaperCard>
+
+          {/* Background color */}
+          <ChromePicker
+            color={this.state.backgroundColor}
+            onChangeComplete={this.handleBackgroundColorUpdate}
+          />
         </Grid>
 
         {/* RESULT */}
         <Result
-          style={style}
+          backgroundImage={savedBackgroundImage}
+          backgroundColor={backgroundColor}
           onDragOver={e => this.onDragOver(e)}
           onDrop={e => {
             this.onDrop(e, 'wip')
