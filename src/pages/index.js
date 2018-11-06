@@ -15,6 +15,8 @@ import Clear from '@material-ui/icons/Clear'
 import Image from '@material-ui/icons/Image'
 import Check from '@material-ui/icons/Check'
 
+import { PADDING_OFFSET_X } from '../utils/appConfig'
+
 const modalDimensions = {
   width: '360px',
   height: '500px',
@@ -54,13 +56,23 @@ const UploadedLink = styled.div`
 `
 
 const Result = styled(PaperCard)`
+  position: relative;
   margin-top: 2rem;
-  min-height: 40vh;
+  height: 40vh;
+`
+
+const Canvas = styled.div`
+  height: 100%;
 `
 
 const Title = styled.h1`
   cursor: pointer;
+  user-select: none;
+  margin: 0;
+  position: absolute;
   color: ${props => props.color};
+  left: ${props => (props.left ? `${props.left}px` : 0)};
+  top: ${props => (props.top ? `${props.top}px` : 0)};
 `
 
 class IndexPage extends React.Component {
@@ -70,6 +82,10 @@ class IndexPage extends React.Component {
       backgroundImage:
         'http://gdj.graphicdesignjunction.com/wp-content/uploads/2014/05/003+background+pattern+designs.jpg',
       savedBackgroundImage: '',
+      size: {
+        width: 1,
+        height: 1,
+      },
       title: {
         modalOpen: false,
         text: 'Starting soon',
@@ -84,7 +100,6 @@ class IndexPage extends React.Component {
 
   // Set background
   setBackground = () => {
-    console.log('set background')
     // Actually set teh background
     this.setState({
       savedBackgroundImage: this.state.backgroundImage,
@@ -135,6 +150,41 @@ class IndexPage extends React.Component {
     })
   }
 
+  // Handle drag and drop
+  onDragStart = (e, id) => {
+    // Setting drop data
+    // e.dataTransfer.setData('id', id)
+    e.dataTransfer.setData('text/plain', id)
+  }
+
+  onDragOver = e => {
+    e.preventDefault()
+  }
+
+  onDrop = ev => {
+    // Getting drop data
+    // let id = ev.dataTransfer.getData('id')
+    // let id = ev.dataTransfer.getData('text')
+    let x = ev.clientX
+    let y = ev.clientY
+
+    // TODO: Opportunity to fine tune the exact drop location
+    // Calculate the correct x and y corrdinates based on the canvas size
+    x = x - PADDING_OFFSET_X
+    y = y - ev.target.parentNode.offsetTop
+
+    this.setState({
+      ...this.state,
+      title: {
+        ...this.state.title,
+        position: {
+          x,
+          y,
+        },
+      },
+    })
+  }
+
   // Handle ESC and Enter keypresses
   componentDidMount() {
     // Setup ESC and Enter listener
@@ -147,6 +197,18 @@ class IndexPage extends React.Component {
       },
       false
     )
+
+    // Update canvas size with the ref's dom size
+    if (this.canvasSize) {
+      const { width, height } = this.canvasSize
+
+      this.setState({
+        size: {
+          width,
+          height,
+        },
+      })
+    }
   }
 
   render() {
@@ -203,39 +265,58 @@ class IndexPage extends React.Component {
         </Grid>
 
         {/* RESULT */}
-        <Result style={style}>
-          <Title onClick={this.handleOpenTitleModal} color={title.color}>
-            {title.text}
-          </Title>
-          {title.modalOpen && (
-            <StyledModal
-              aria-labelledby="title edit dialog"
-              aria-describedby="edit title text, color and position"
-              open={title.modalOpen}
-              onClose={this.handleCloseTitleModal}
+        <Result
+          style={style}
+          onDragOver={e => this.onDragOver(e)}
+          onDrop={e => {
+            this.onDrop(e, 'wip')
+          }}
+        >
+          <Canvas
+            innerRef={elem =>
+              (this.canvasSize = elem ? elem.getBoundingClientRect() : null)
+            }
+          >
+            <Title
+              onClick={this.handleOpenTitleModal}
+              color={title.color}
+              left={title.position.x}
+              top={title.position.y}
+              onDragStart={e => this.onDragStart(e)}
+              draggable
             >
-              <PaperCard style={{ width: '100%' }}>
-                <TextField
-                  id="title"
-                  label="Text"
-                  value={title.text}
-                  onChange={this.handleChange('title', 'text')}
-                  margin="normal"
-                  variant="outlined"
-                />
-                <ChromePicker
-                  color={this.state.title.color}
-                  onChangeComplete={this.handleTitleColorUpdate}
-                />
-                <IconButton
-                  aria-label="Save changes"
-                  onClick={this.handleCloseTitleModal}
-                >
-                  <Check />
-                </IconButton>
-              </PaperCard>
-            </StyledModal>
-          )}
+              {title.text}
+            </Title>
+            {title.modalOpen && (
+              <StyledModal
+                aria-labelledby="title edit dialog"
+                aria-describedby="edit title text, color and position"
+                open={title.modalOpen}
+                onClose={this.handleCloseTitleModal}
+              >
+                <PaperCard style={{ width: '100%' }}>
+                  <TextField
+                    id="title"
+                    label="Text"
+                    value={title.text}
+                    onChange={this.handleChange('title', 'text')}
+                    margin="normal"
+                    variant="outlined"
+                  />
+                  <ChromePicker
+                    color={this.state.title.color}
+                    onChangeComplete={this.handleTitleColorUpdate}
+                  />
+                  <IconButton
+                    aria-label="Save changes"
+                    onClick={this.handleCloseTitleModal}
+                  >
+                    <Check />
+                  </IconButton>
+                </PaperCard>
+              </StyledModal>
+            )}
+          </Canvas>
         </Result>
       </Layout>
     )
