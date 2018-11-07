@@ -1,21 +1,25 @@
-import React from 'react'
-import styled from 'styled-components'
-
-import { ChromePicker } from 'react-color'
-
-import Layout from '../components/Layout/layout'
-import Grid from '../components/Layout/Grid'
-import PaperCard from '../components/Layout/PaperCard'
-
+import IconButton from '@material-ui/core/IconButton'
+import InputAdornment from '@material-ui/core/InputAdornment'
 import Modal from '@material-ui/core/Modal'
 import TextField from '@material-ui/core/TextField'
-import InputAdornment from '@material-ui/core/InputAdornment'
-import IconButton from '@material-ui/core/IconButton'
+import Check from '@material-ui/icons/Check'
 import Clear from '@material-ui/icons/Clear'
 import Image from '@material-ui/icons/Image'
-import Check from '@material-ui/icons/Check'
+import React from 'react'
+import { ChromePicker } from 'react-color'
+import styled from 'styled-components'
+import Grid from '../components/Layout/Grid'
+import Layout from '../components/Layout/layout'
+import PaperCard from '../components/PaperCard'
+import Particles from '../components/Particles'
+import { PADDING_OFFSET_X, ParticlesConfig } from '../utils/appConfig'
+import Select from '@material-ui/core/Select'
+import InputLabel from '@material-ui/core/InputLabel'
+import FormControl from '@material-ui/core/FormControl'
+import OutlinedInput from '@material-ui/core/OutlinedInput'
+import MenuItem from '@material-ui/core/MenuItem'
 
-import { PADDING_OFFSET_X } from '../utils/appConfig'
+const BACKGROUND_EFFECTS_OPTIONS = Object.keys(ParticlesConfig)
 
 const modalDimensions = {
   width: '360px',
@@ -60,13 +64,19 @@ const Result = styled(PaperCard)`
   margin-top: 2rem;
   height: 40vh;
   background-color: ${props =>
-    props.backgroundColor ? `${props.backgroundColor}!important` : ``};
+    props.backgroundcolor ? `${props.backgroundcolor}!important` : ``};
   background-image: ${props =>
-    props.backgroundImage ? `url(${props.backgroundImage})` : ``};
+    props.backgroundimage ? `url(${props.backgroundimage})` : ``};
 `
 
 const Canvas = styled.div`
   height: 100%;
+  overflow: hidden;
+
+  canvas {
+    height: 100%;
+    max-height: 100% !important;
+  }
 `
 
 const Title = styled.h1`
@@ -87,6 +97,7 @@ class IndexPage extends React.Component {
       backgroundImage:
         'http://gdj.graphicdesignjunction.com/wp-content/uploads/2014/05/003+background+pattern+designs.jpg',
       savedBackgroundImage: '',
+      backgroundEffect: '',
       size: {
         width: 1,
         height: 1,
@@ -123,6 +134,17 @@ class IndexPage extends React.Component {
     })
   }
 
+  // Change background effects
+  handleBackgroundEffectUpdate = e => {
+    let effectName = e.target.value
+
+    this.setState({
+      ...this.state,
+      backgroundEffect: effectName,
+    })
+  }
+
+  // Change background color
   handleBackgroundColorUpdate = color => {
     this.setState({
       ...this.state,
@@ -130,6 +152,7 @@ class IndexPage extends React.Component {
     })
   }
 
+  // Change title color
   handleTitleColorUpdate = color => {
     this.setState({
       ...this.state,
@@ -174,6 +197,7 @@ class IndexPage extends React.Component {
   }
 
   onDrop = ev => {
+    ev.preventDefault()
     // Getting drop data
     // let id = ev.dataTransfer.getData('id')
     // let id = ev.dataTransfer.getData('text')
@@ -183,7 +207,7 @@ class IndexPage extends React.Component {
     // TODO: Opportunity to fine tune the exact drop location
     // Calculate the correct x and y corrdinates based on the canvas size
     x = x - PADDING_OFFSET_X
-    y = y - ev.target.parentNode.offsetTop
+    y = y - this.canvasSize.y
 
     this.setState({
       ...this.state,
@@ -225,9 +249,10 @@ class IndexPage extends React.Component {
 
   render() {
     const {
-      backgroundImage,
       backgroundColor,
+      backgroundImage,
       savedBackgroundImage,
+      backgroundEffect,
       title,
     } = this.state
 
@@ -277,18 +302,45 @@ class IndexPage extends React.Component {
 
           {/* Background color */}
           <ChromePicker
-            color={this.state.backgroundColor}
+            color={backgroundColor}
             onChangeComplete={this.handleBackgroundColorUpdate}
           />
+
+          {/* Background effect */}
+          <FormControl variant="outlined">
+            <InputLabel htmlFor="outlined-background-effect">
+              Background effect
+            </InputLabel>
+            <Select
+              value={backgroundEffect}
+              onChange={this.handleBackgroundEffectUpdate}
+              input={
+                <OutlinedInput
+                  labelWidth={144}
+                  id="outlined-background-effect"
+                />
+              }
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {BACKGROUND_EFFECTS_OPTIONS.map((option, index) => (
+                <MenuItem key={index} value={option}>
+                  {option[0].toUpperCase()}
+                  {option.slice(1)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
 
         {/* RESULT */}
         <Result
-          backgroundImage={savedBackgroundImage}
-          backgroundColor={backgroundColor}
+          backgroundimage={savedBackgroundImage}
+          backgroundcolor={backgroundColor}
           onDragOver={e => this.onDragOver(e)}
           onDrop={e => {
-            this.onDrop(e, 'wip')
+            this.onDrop(e)
           }}
         >
           <Canvas
@@ -296,6 +348,10 @@ class IndexPage extends React.Component {
               (this.canvasSize = elem ? elem.getBoundingClientRect() : null)
             }
           >
+            {/* Particles.js background effects */}
+            {backgroundEffect && (
+              <Particles params={ParticlesConfig[backgroundEffect]} />
+            )}
             <Title
               onClick={this.handleOpenTitleModal}
               color={title.color}
