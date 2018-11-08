@@ -1,6 +1,13 @@
+import FormControl from '@material-ui/core/FormControl'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 import IconButton from '@material-ui/core/IconButton'
 import InputAdornment from '@material-ui/core/InputAdornment'
+import InputLabel from '@material-ui/core/InputLabel'
+import MenuItem from '@material-ui/core/MenuItem'
 import Modal from '@material-ui/core/Modal'
+import OutlinedInput from '@material-ui/core/OutlinedInput'
+import Select from '@material-ui/core/Select'
+import Switch from '@material-ui/core/Switch'
 import TextField from '@material-ui/core/TextField'
 import Check from '@material-ui/icons/Check'
 import Clear from '@material-ui/icons/Clear'
@@ -13,11 +20,6 @@ import Layout from '../components/Layout/layout'
 import PaperCard from '../components/PaperCard'
 import Particles from '../components/Particles'
 import { PADDING_OFFSET_X, ParticlesConfig } from '../utils/appConfig'
-import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
-import FormControl from '@material-ui/core/FormControl'
-import OutlinedInput from '@material-ui/core/OutlinedInput'
-import MenuItem from '@material-ui/core/MenuItem'
 
 const BACKGROUND_EFFECTS_OPTIONS = Object.keys(ParticlesConfig)
 
@@ -85,6 +87,18 @@ const Title = styled.h1`
   margin: 0;
   position: absolute;
   color: ${props => props.color};
+  font-size: ${props => props.fontSize}px;
+  left: ${props => (props.left ? `${props.left}px` : 0)};
+  top: ${props => (props.top ? `${props.top}px` : 0)};
+`
+
+const Timer = styled.h2`
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+  position: absolute;
+  color: ${props => props.color};
+  font-size: ${props => props.fontSize}px;
   left: ${props => (props.left ? `${props.left}px` : 0)};
   top: ${props => (props.top ? `${props.top}px` : 0)};
 `
@@ -102,14 +116,26 @@ class IndexPage extends React.Component {
         width: 1,
         height: 1,
       },
-      title: {
-        modalOpen: false,
-        text: 'Starting soon',
+      timerOn: false,
+      timer: {
         color: '',
+        fontSize: 32,
+        modalOpen: false,
         position: {
           x: 0,
           y: 0,
         },
+        value: 260,
+      },
+      title: {
+        color: '',
+        fontSize: 32,
+        modalOpen: false,
+        position: {
+          x: 0,
+          y: 0,
+        },
+        text: 'Starting soon',
       },
     }
   }
@@ -185,6 +211,53 @@ class IndexPage extends React.Component {
     })
   }
 
+  // Change timer color
+  handleTimerColorUpdate = color => {
+    this.setState({
+      ...this.state,
+      timer: {
+        ...this.state.timer,
+        color: color.hex,
+      },
+    })
+  }
+
+  // Open timer modal
+  handleOpenTimerModal = () => {
+    this.setState({
+      ...this.state,
+      timer: {
+        ...this.state.timer,
+        modalOpen: true,
+      },
+    })
+  }
+
+  // Close timer modal
+  handleCloseTimerModal = () => {
+    this.setState({
+      ...this.state,
+      timer: {
+        ...this.state.timer,
+        modalOpen: false,
+      },
+    })
+  }
+
+  // Convert seconds to minutes and seconds
+  handleConvertTimerSeconds = totalSeconds => {
+    let minutes = Math.floor(totalSeconds / 60)
+    let seconds = totalSeconds - minutes * 60
+
+    if (seconds == 0) {
+      seconds = `00`
+    } else if (seconds < 10) {
+      seconds = `0${seconds}`
+    }
+
+    return `${minutes}:${seconds}`
+  }
+
   // Handle drag and drop
   onDragStart = (e, id) => {
     // Setting drop data
@@ -196,13 +269,15 @@ class IndexPage extends React.Component {
     e.preventDefault()
   }
 
-  onDrop = ev => {
-    ev.preventDefault()
+  onDrop = e => {
+    e.preventDefault()
     // Getting drop data
-    // let id = ev.dataTransfer.getData('id')
-    // let id = ev.dataTransfer.getData('text')
-    let x = ev.clientX
-    let y = ev.clientY
+    // let id = e.dataTransfer.getData('id')
+    let id = e.dataTransfer.getData('text')
+
+    // Get mouse coords
+    let x = e.clientX
+    let y = e.clientY
 
     // TODO: Opportunity to fine tune the exact drop location
     // Calculate the correct x and y corrdinates based on the canvas size
@@ -211,8 +286,8 @@ class IndexPage extends React.Component {
 
     this.setState({
       ...this.state,
-      title: {
-        ...this.state.title,
+      [id]: {
+        ...this.state[id],
         position: {
           x,
           y,
@@ -254,6 +329,8 @@ class IndexPage extends React.Component {
       savedBackgroundImage,
       backgroundEffect,
       title,
+      timer,
+      timerOn,
     } = this.state
 
     return (
@@ -332,6 +409,21 @@ class IndexPage extends React.Component {
               ))}
             </Select>
           </FormControl>
+
+          {/* Timer switch */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={timerOn}
+                onChange={e => {
+                  this.setState({ timerOn: e.target.checked })
+                }}
+                value="timerOn"
+                color="primary"
+              />
+            }
+            label="Timer"
+          />
         </Grid>
 
         {/* RESULT */}
@@ -352,16 +444,19 @@ class IndexPage extends React.Component {
             {backgroundEffect && (
               <Particles params={ParticlesConfig[backgroundEffect]} />
             )}
+            {/* Title */}
             <Title
               onClick={this.handleOpenTitleModal}
               color={title.color}
+              fontSize={title.fontSize}
               left={title.position.x}
               top={title.position.y}
-              onDragStart={e => this.onDragStart(e)}
+              onDragStart={e => this.onDragStart(e, 'title')}
               draggable
             >
               {title.text}
             </Title>
+            {/* Title config dialog */}
             {title.modalOpen && (
               <StyledModal
                 aria-labelledby="title edit dialog"
@@ -378,8 +473,20 @@ class IndexPage extends React.Component {
                     margin="normal"
                     variant="outlined"
                   />
+                  <TextField
+                    variant="outlined"
+                    label="Size"
+                    value={title.fontSize}
+                    onChange={this.handleChange('title', 'fontSize')}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">px</InputAdornment>
+                      ),
+                    }}
+                  />
+                  <p>Color:</p>
                   <ChromePicker
-                    color={this.state.title.color}
+                    color={title.color}
                     onChangeComplete={this.handleTitleColorUpdate}
                   />
                   <IconButton
@@ -390,6 +497,73 @@ class IndexPage extends React.Component {
                   </IconButton>
                 </PaperCard>
               </StyledModal>
+            )}
+            {/* Timer */}
+            {timerOn && (
+              <>
+                <Timer
+                  onClick={this.handleOpenTimerModal}
+                  color={timer.color}
+                  fontSize={timer.fontSize}
+                  left={timer.position.x}
+                  top={timer.position.y}
+                  onDragStart={e => this.onDragStart(e, 'timer')}
+                  draggable
+                >
+                  {this.handleConvertTimerSeconds(timer.value)}
+                </Timer>
+                {/* Timer config dialog */}
+                {timer.modalOpen && (
+                  <StyledModal
+                    aria-labelledby="timer edit dialog"
+                    aria-describedby="edit timer value, color and position"
+                    open={timer.modalOpen}
+                    onClose={this.handleCloseTimerModal}
+                  >
+                    <PaperCard style={{ width: '100%' }}>
+                      <TextField
+                        id="timer"
+                        label="Seconds"
+                        value={timer.value}
+                        onChange={this.handleChange('timer', 'value')}
+                        // Alternative inline implementation, probably won't work when extracted out as its own component
+                        // onChange={e => {
+                        //   this.setState({
+                        //     timer: {
+                        //       ...timer,
+                        //       value: e.target.value,
+                        //     },
+                        //   })
+                        // }}
+                        margin="normal"
+                        variant="outlined"
+                      />
+                      <TextField
+                        variant="outlined"
+                        label="Size"
+                        value={timer.fontSize}
+                        onChange={this.handleChange('timer', 'fontSize')}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">px</InputAdornment>
+                          ),
+                        }}
+                      />
+                      <p>Color:</p>
+                      <ChromePicker
+                        color={timer.color}
+                        onChangeComplete={this.handleTimerColorUpdate}
+                      />
+                      <IconButton
+                        aria-label="Save changes"
+                        onClick={this.handleCloseTimerModal}
+                      >
+                        <Check />
+                      </IconButton>
+                    </PaperCard>
+                  </StyledModal>
+                )}
+              </>
             )}
           </Canvas>
         </Result>
