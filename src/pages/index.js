@@ -116,7 +116,9 @@ class IndexPage extends React.Component {
         width: 1,
         height: 1,
       },
-      timerOn: false,
+      timerShow: false,
+      timerStart: false,
+      timerId: '',
       timer: {
         color: '',
         fontSize: 32,
@@ -244,6 +246,55 @@ class IndexPage extends React.Component {
     })
   }
 
+  // Alternative outside of state implementation
+  // Start timer
+  // handleStartTimer = e => {
+  //   let currentTimerState = e.target.checked
+
+  //   if (currentTimerState) {
+  //     this.timerId = window.setInterval(this.handleTick, 1000)
+  //   } else {
+  //     if (this.timerId) {
+  //       window.clearInterval(this.timerId)
+  //     }
+  //   }
+
+  //   this.setState({
+  //     timerStart: currentTimerState,
+  //   })
+  // }
+
+  // Start timer
+  handleStartTimer = e => {
+    let currentTimerState = e.target.checked
+    let { timerId } = this.state
+
+    if (currentTimerState) {
+      timerId = window.setInterval(this.handleTick, 1000)
+    } else {
+      if (timerId) {
+        window.clearInterval(timerId)
+      }
+    }
+
+    this.setState({
+      timerStart: currentTimerState,
+      timerId,
+    })
+  }
+
+  // Timer tick
+  handleTick = () => {
+    console.log('hi')
+    this.setState({
+      ...this.state,
+      timer: {
+        ...this.state.timer,
+        value: --this.state.timer.value,
+      },
+    })
+  }
+
   // Convert seconds to minutes and seconds
   handleConvertTimerSeconds = totalSeconds => {
     let minutes = Math.floor(totalSeconds / 60)
@@ -304,6 +355,7 @@ class IndexPage extends React.Component {
       e => {
         if (e.code === 'Escape' || e.code === 'Enter') {
           this.handleCloseTitleModal()
+          this.handleCloseTimerModal()
         }
       },
       false
@@ -330,7 +382,8 @@ class IndexPage extends React.Component {
       backgroundEffect,
       title,
       timer,
-      timerOn,
+      timerShow,
+      timerStart,
     } = this.state
 
     return (
@@ -410,19 +463,32 @@ class IndexPage extends React.Component {
             </Select>
           </FormControl>
 
-          {/* Timer switch */}
+          {/* Timer display switch */}
           <FormControlLabel
             control={
               <Switch
-                checked={timerOn}
+                checked={timerShow}
                 onChange={e => {
-                  this.setState({ timerOn: e.target.checked })
+                  this.setState({ timerShow: e.target.checked })
                 }}
-                value="timerOn"
+                value="timerShow"
                 color="primary"
               />
             }
-            label="Timer"
+            label="Show timer"
+          />
+
+          {/* Timer start switch */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={timerStart}
+                onChange={this.handleStartTimer}
+                value="timerStart"
+                color="primary"
+              />
+            }
+            label="Start timer"
           />
         </Grid>
 
@@ -499,7 +565,7 @@ class IndexPage extends React.Component {
               </StyledModal>
             )}
             {/* Timer */}
-            {timerOn && (
+            {timerShow && (
               <>
                 <Timer
                   onClick={this.handleOpenTimerModal}

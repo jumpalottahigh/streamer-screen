@@ -19,6 +19,9 @@ module.exports = {
               main: '#fafafa',
             },
           },
+          typography: {
+            useNextVariants: true,
+          },
         },
       },
     },
