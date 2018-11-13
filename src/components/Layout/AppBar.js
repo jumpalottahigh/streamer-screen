@@ -52,9 +52,9 @@ function ButtonAppBar(props) {
             </Brand>
           </div>
           <NavLinks>
-            <Link to="/">
-              <Button color="primary">Edit</Button>
-            </Link>
+            <Button color="primary" onClick={props.handleSaveStateToURL}>
+              Save
+            </Button>
             <Link to="/preview/">
               <Button color="primary">Preview</Button>
             </Link>

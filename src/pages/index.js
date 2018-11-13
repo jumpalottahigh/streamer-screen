@@ -12,6 +12,7 @@ import TextField from '@material-ui/core/TextField'
 import Check from '@material-ui/icons/Check'
 import Clear from '@material-ui/icons/Clear'
 import Image from '@material-ui/icons/Image'
+import { navigate } from 'gatsby'
 import React from 'react'
 import { ChromePicker } from 'react-color'
 import styled from 'styled-components'
@@ -20,6 +21,7 @@ import Layout from '../components/Layout/layout'
 import PaperCard from '../components/PaperCard'
 import Particles from '../components/Particles'
 import { PADDING_OFFSET_X, ParticlesConfig } from '../utils/appConfig'
+import { serialize, deserialize } from '../utils/stringTransformer'
 
 const BACKGROUND_EFFECTS_OPTIONS = Object.keys(ParticlesConfig)
 
@@ -347,6 +349,27 @@ class IndexPage extends React.Component {
     })
   }
 
+  // Handle save state to URL
+  handleSaveStateToURL = () => {
+    console.log('SAVE STATE TO URL RUNS')
+    // Serialze the state object
+    let serializedState = serialize(this.state)
+    let searchParams = new URLSearchParams(serializedState)
+
+    navigate(`/?${searchParams.toString()}`)
+  }
+
+  // Handle load state from URL
+  handleLoadStateFromURL = () => {
+    let searchParams = new URLSearchParams(window.location.search).toString()
+    let decodedParams = window.decodeURIComponent(searchParams)
+    console.log('Decoded params: ', decodedParams)
+
+    let deserializedState = deserialize(decodedParams)
+
+    console.log('Deserialized state: ', deserializedState)
+  }
+
   // Handle ESC and Enter keypresses
   componentDidMount() {
     // Setup ESC and Enter listener
@@ -372,6 +395,9 @@ class IndexPage extends React.Component {
         },
       })
     }
+
+    // Handle load from URL params
+    this.handleLoadStateFromURL()
   }
 
   render() {
@@ -387,7 +413,10 @@ class IndexPage extends React.Component {
     } = this.state
 
     return (
-      <Layout location={this.props.location}>
+      <Layout
+        location={this.props.location}
+        handleSaveStateToURL={this.handleSaveStateToURL}
+      >
         {/* CONTROLS */}
         <Grid>
           {/* Background image */}
