@@ -17,9 +17,18 @@ export const serialize = function(obj, prefix) {
   return str.join('&')
 }
 
-// TODO:
+// assign(settings, ['Modules', 'Video', 'Plugin'], 'JWPlayer');
+function createNestedObject(obj, keyPath, value) {
+  let lastKeyIndex = keyPath.length - 1
+  for (var i = 0; i < lastKeyIndex; ++i) {
+    let key = keyPath[i]
+    if (!(key in obj)) obj[key] = {}
+    obj = obj[key]
+  }
+  obj[keyPath[lastKeyIndex]] = value
+}
+
 export const deserialize = function(params) {
-  console.log(params)
   let obj = {}
 
   let levelOneKeys = params.split('&')
@@ -27,23 +36,12 @@ export const deserialize = function(params) {
     let key1 = key.split('=')[0]
     let value = key.split('=')[1]
 
+    let nestedKeyPath = key1.split('[')
+    nestedKeyPath = nestedKeyPath.map(item => item.replace(']', ''))
+
     // If key has nested levels, set them up
-    if (key1.includes('[')) {
-      console.log('Has sub levels')
-      let subLevels = key1.split('[')
-
-      // TODO:
-      // recursion ?
-      subLevels.map((subKey, index) => {
-        if (index != subLevels.length - 1) {
-          obj[subKey] = {}
-        } else {
-          obj[subKey] = value
-        }
-      })
-
-      console.log(subLevels.length)
-      console.log(subLevels)
+    if (nestedKeyPath.length > 1) {
+      createNestedObject(obj, nestedKeyPath, value)
     } else {
       // Doesnt have nested levels, just set the value
       obj[key1] = value

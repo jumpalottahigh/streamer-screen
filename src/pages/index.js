@@ -248,24 +248,6 @@ class IndexPage extends React.Component {
     })
   }
 
-  // Alternative outside of state implementation
-  // Start timer
-  // handleStartTimer = e => {
-  //   let currentTimerState = e.target.checked
-
-  //   if (currentTimerState) {
-  //     this.timerId = window.setInterval(this.handleTick, 1000)
-  //   } else {
-  //     if (this.timerId) {
-  //       window.clearInterval(this.timerId)
-  //     }
-  //   }
-
-  //   this.setState({
-  //     timerStart: currentTimerState,
-  //   })
-  // }
-
   // Start timer
   handleStartTimer = e => {
     let currentTimerState = e.target.checked
@@ -287,7 +269,6 @@ class IndexPage extends React.Component {
 
   // Timer tick
   handleTick = () => {
-    console.log('hi')
     this.setState({
       ...this.state,
       timer: {
@@ -351,7 +332,6 @@ class IndexPage extends React.Component {
 
   // Handle save state to URL
   handleSaveStateToURL = () => {
-    console.log('SAVE STATE TO URL RUNS')
     // Serialze the state object
     let serializedState = serialize(this.state)
     let searchParams = new URLSearchParams(serializedState)
@@ -362,12 +342,29 @@ class IndexPage extends React.Component {
   // Handle load state from URL
   handleLoadStateFromURL = () => {
     let searchParams = new URLSearchParams(window.location.search).toString()
-    let decodedParams = window.decodeURIComponent(searchParams)
-    console.log('Decoded params: ', decodedParams)
 
+    if (!searchParams) return
+
+    let decodedParams = window.decodeURIComponent(searchParams)
     let deserializedState = deserialize(decodedParams)
 
-    console.log('Deserialized state: ', deserializedState)
+    // Update state
+    this.setState({
+      ...deserializedState,
+      // TODO: timer state should be dealt with properly
+      timerStart: false,
+      timerShow: false,
+      // Normalize state by force closing modal state regardless of saved state
+      title: {
+        ...deserializedState.title,
+        text: deserializedState.title.text.replace(/%20|\+/i, ' '),
+        modalOpen: false,
+      },
+      timer: {
+        ...deserializedState.timer,
+        modalOpen: false,
+      },
+    })
   }
 
   // Handle ESC and Enter keypresses
