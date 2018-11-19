@@ -16,7 +16,6 @@ import { navigate } from 'gatsby'
 import React from 'react'
 import { ChromePicker } from 'react-color'
 import styled from 'styled-components'
-import Grid from '../components/Layout/Grid'
 import Layout from '../components/Layout/layout'
 import PaperCard from '../components/PaperCard'
 import Particles from '../components/Particles'
@@ -65,8 +64,15 @@ const UploadedLink = styled.div`
 
 const Result = styled(PaperCard)`
   position: relative;
-  margin-top: 2rem;
-  height: 40vh;
+  max-width: 1220px;
+
+  &:before {
+    display: block;
+    content: '';
+    width: 100%;
+    padding-top: (9 / 16) * 100%;
+  }
+
   background-color: ${props =>
     props.backgroundcolor ? `${props.backgroundcolor}!important` : ``};
   background-image: ${props =>
@@ -103,6 +109,43 @@ const Timer = styled.h2`
   font-size: ${props => props.fontSize}px;
   left: ${props => (props.left ? `${props.left}px` : 0)};
   top: ${props => (props.top ? `${props.top}px` : 0)};
+`
+
+const ControlPanel = styled(PaperCard)`
+  display: grid;
+  gap: 24px;
+  margin-top: 2rem;
+
+  .chrome-picker {
+    width: 100% !important;
+  }
+
+  @media (min-width: 700px) {
+    grid-template-columns: 1fr 1fr;
+
+    .chrome-picker {
+      grid-row: 1 / 5;
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .chrome-picker {
+      width: 80% !important;
+      margin: 0 auto;
+    }
+  }
+
+  @media (min-width: 1420px) {
+    grid-template-columns: 1fr;
+    margin-top: 0;
+    gap: 10px;
+
+    .chrome-picker {
+      width: 80% !important;
+      grid-row: 1 / 3;
+      margin: 0 auto;
+    }
+  }
 `
 
 class IndexPage extends React.Component {
@@ -414,110 +457,6 @@ class IndexPage extends React.Component {
         location={this.props.location}
         handleSaveStateToURL={this.handleSaveStateToURL}
       >
-        {/* CONTROLS */}
-        <Grid>
-          {/* Background image */}
-          <PaperCard>
-            <TextField
-              id="backgroundImage"
-              label={
-                <IconLabel>
-                  <Image className="icon" />{' '}
-                  <span className="text">Background Image</span>
-                </IconLabel>
-              }
-              value={backgroundImage}
-              onChange={this.handleChange('backgroundImage')}
-              margin="normal"
-              variant="outlined"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="Set background"
-                      onClick={this.setBackground}
-                    >
-                      <Check />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {savedBackgroundImage && (
-              <UploadedLink>
-                {savedBackgroundImage}{' '}
-                <Clear
-                  className="uploaded-link__clear"
-                  onClick={() => {
-                    this.setState({ savedBackgroundImage: '' })
-                  }}
-                />
-              </UploadedLink>
-            )}
-          </PaperCard>
-
-          {/* Background color */}
-          <ChromePicker
-            color={backgroundColor}
-            onChangeComplete={this.handleBackgroundColorUpdate}
-          />
-
-          {/* Background effect */}
-          <FormControl variant="outlined">
-            <InputLabel htmlFor="outlined-background-effect">
-              Background effect
-            </InputLabel>
-            <Select
-              value={backgroundEffect}
-              onChange={this.handleBackgroundEffectUpdate}
-              input={
-                <OutlinedInput
-                  labelWidth={144}
-                  id="outlined-background-effect"
-                />
-              }
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {BACKGROUND_EFFECTS_OPTIONS.map((option, index) => (
-                <MenuItem key={index} value={option}>
-                  {option[0].toUpperCase()}
-                  {option.slice(1)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Timer display switch */}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={timerShow}
-                onChange={e => {
-                  this.setState({ timerShow: e.target.checked })
-                }}
-                value="timerShow"
-                color="primary"
-              />
-            }
-            label="Show timer"
-          />
-
-          {/* Timer start switch */}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={timerStart}
-                onChange={this.handleStartTimer}
-                value="timerStart"
-                color="primary"
-              />
-            }
-            label="Start timer"
-          />
-        </Grid>
-
         {/* RESULT */}
         <Result
           backgroundimage={savedBackgroundImage}
@@ -659,6 +598,106 @@ class IndexPage extends React.Component {
             )}
           </Canvas>
         </Result>
+
+        {/* CONTROLS */}
+        <ControlPanel>
+          {/* Background image */}
+          <TextField
+            id="backgroundImage"
+            label={
+              <IconLabel>
+                <Image className="icon" />{' '}
+                <span className="text">Background Image</span>
+              </IconLabel>
+            }
+            value={backgroundImage}
+            onChange={this.handleChange('backgroundImage')}
+            margin="normal"
+            variant="outlined"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="Set background"
+                    onClick={this.setBackground}
+                  >
+                    <Check />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          {savedBackgroundImage && (
+            <UploadedLink>
+              {savedBackgroundImage}{' '}
+              <Clear
+                className="uploaded-link__clear"
+                onClick={() => {
+                  this.setState({ savedBackgroundImage: '' })
+                }}
+              />
+            </UploadedLink>
+          )}
+
+          {/* Background effect */}
+          <FormControl variant="outlined" style={{ width: '100%' }}>
+            <InputLabel htmlFor="outlined-background-effect">
+              Background effect
+            </InputLabel>
+            <Select
+              value={backgroundEffect}
+              onChange={this.handleBackgroundEffectUpdate}
+              input={
+                <OutlinedInput
+                  labelWidth={144}
+                  id="outlined-background-effect"
+                />
+              }
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {BACKGROUND_EFFECTS_OPTIONS.map((option, index) => (
+                <MenuItem key={index} value={option}>
+                  {option[0].toUpperCase()}
+                  {option.slice(1)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* Background color */}
+          <ChromePicker
+            color={backgroundColor}
+            onChangeComplete={this.handleBackgroundColorUpdate}
+          />
+          {/* Timer display switch */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={timerShow}
+                onChange={e => {
+                  this.setState({ timerShow: e.target.checked })
+                }}
+                value="timerShow"
+                color="primary"
+              />
+            }
+            label="Show timer"
+          />
+
+          {/* Timer start switch */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={timerStart}
+                onChange={this.handleStartTimer}
+                value="timerStart"
+                color="primary"
+              />
+            }
+            label="Start timer"
+          />
+        </ControlPanel>
       </Layout>
     )
   }

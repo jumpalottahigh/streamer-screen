@@ -29,13 +29,7 @@ const Brand = styled(Link)`
   }
 `
 
-const NavLinks = styled.div`
-  display: none;
-
-  @media (min-width: 650px) {
-    display: block;
-  }
-`
+const NavLinks = styled.div``
 
 function ButtonAppBar(props) {
   const { classes } = props
@@ -48,16 +42,17 @@ function ButtonAppBar(props) {
         <Toolbar>
           <div className={classes.flex}>
             <Brand to="/">
-              <img src={logo} style={{ height: '48px' }} alt="FPVTIPS" />
+              <img
+                src={logo}
+                style={{ height: '48px' }}
+                alt="Streamer Start Screen"
+              />
             </Brand>
           </div>
           <NavLinks>
             <Button color="primary" onClick={props.handleSaveStateToURL}>
               Save
             </Button>
-            <Link to="/preview/">
-              <Button color="primary">Preview</Button>
-            </Link>
           </NavLinks>
         </Toolbar>
       </AppBar>
