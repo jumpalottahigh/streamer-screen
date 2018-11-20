@@ -66,12 +66,12 @@ const Result = styled(PaperCard)`
   position: relative;
   max-width: 1220px;
 
-  &:before {
+  /* &:before {
     display: block;
     content: '';
     width: 100%;
     padding-top: (9 / 16) * 100%;
-  }
+  } */
 
   background-color: ${props =>
     props.backgroundcolor ? `${props.backgroundcolor}!important` : ``};
@@ -153,8 +153,7 @@ class IndexPage extends React.Component {
     super(props)
     this.state = {
       backgroundColor: '#fff',
-      backgroundImage:
-        'http://gdj.graphicdesignjunction.com/wp-content/uploads/2014/05/003+background+pattern+designs.jpg',
+      backgroundImage: '',
       savedBackgroundImage: '',
       backgroundEffect: '',
       size: {
@@ -189,7 +188,7 @@ class IndexPage extends React.Component {
 
   // Set background
   setBackground = () => {
-    // Actually set teh background
+    // Actually set the background
     this.setState({
       savedBackgroundImage: this.state.backgroundImage,
       backgroundImage: '',
@@ -204,6 +203,16 @@ class IndexPage extends React.Component {
         ...this.state[node],
         [field]: event.target.value,
       },
+    })
+  }
+
+  // Update background field
+  handleBackgroundImageUpdate = e => {
+    let backgroundImage = e.target.value
+
+    this.setState({
+      ...this.state,
+      backgroundImage,
     })
   }
 
@@ -557,15 +566,6 @@ class IndexPage extends React.Component {
                         label="Seconds"
                         value={timer.value}
                         onChange={this.handleChange('timer', 'value')}
-                        // Alternative inline implementation, probably won't work when extracted out as its own component
-                        // onChange={e => {
-                        //   this.setState({
-                        //     timer: {
-                        //       ...timer,
-                        //       value: e.target.value,
-                        //     },
-                        //   })
-                        // }}
                         margin="normal"
                         variant="outlined"
                       />
@@ -611,7 +611,7 @@ class IndexPage extends React.Component {
               </IconLabel>
             }
             value={backgroundImage}
-            onChange={this.handleChange('backgroundImage')}
+            onChange={this.handleBackgroundImageUpdate}
             margin="normal"
             variant="outlined"
             InputProps={{
